@@ -91,6 +91,8 @@
       background:#1C1C1F;border:1px solid rgba(255,255,255,.12);border-radius:14px;
       box-shadow:0 20px 50px rgba(0,0,0,.5);padding:10px;z-index:20}
   .dd.open .dd-menu{display:block}
+  /* невидимый мостик через зазор кнопка↔меню: без него hover слетает по дороге */
+  .dd-menu::before{content:"";position:absolute;left:-14px;right:-14px;top:-15px;height:15px}
   .dd-menu a{display:block;padding:11px 14px;border-radius:9px;font-size:14.5px;color:rgba(255,255,255,.88)}
   .dd-menu a:hover{background:rgba(255,255,255,.07);color:#fff}
   .dd-menu a.current{color:#9DB4FF}
@@ -1130,8 +1132,18 @@
   document.addEventListener('click', function(){
     dd.classList.remove('open'); btn.setAttribute('aria-expanded','false');
   });
-  dd.addEventListener('mouseenter', function(){ dd.classList.add('open'); btn.setAttribute('aria-expanded','true'); });
-  dd.addEventListener('mouseleave', function(){ dd.classList.remove('open'); btn.setAttribute('aria-expanded','false'); });
+  // закрытие с задержкой: курсор успевает дойти до меню, не теряя его
+  var ddTimer = null;
+  dd.addEventListener('mouseenter', function(){
+    clearTimeout(ddTimer);
+    dd.classList.add('open'); btn.setAttribute('aria-expanded','true');
+  });
+  dd.addEventListener('mouseleave', function(){
+    clearTimeout(ddTimer);
+    ddTimer = setTimeout(function(){
+      dd.classList.remove('open'); btn.setAttribute('aria-expanded','false');
+    }, 250);
+  });
 
   var burger = document.querySelector('.burger');
   var menu = document.getElementById('mobile-menu');
