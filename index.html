@@ -332,13 +332,15 @@
        background:linear-gradient(100deg,#3D3DF0,#27009A);-webkit-background-clip:text;background-clip:text;color:transparent}
   .lead-fact .l{font-size:13.5px;color:#6B6B70;margin-top:4px}
   .team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:26px}
-  .tm{background:#fff;border:1px solid #ECECEF;border-radius:20px;padding:24px 18px;text-align:center}
+  /* flex + margin-top:auto у бейджа — плашки уровня стоят в один ряд, даже если описание длиннее */
+  .tm{background:#fff;border:1px solid #ECECEF;border-radius:20px;padding:24px 18px;text-align:center;
+      display:flex;flex-direction:column}
   .tm.mcc{background:linear-gradient(160deg,#EEF0FE 0%,#fff 70%);border-color:rgba(61,61,240,.35)}
   .tm img{width:104px;height:104px;border-radius:50%;object-fit:cover;object-position:50% 20%;margin-bottom:16px}
   .tm .name{font-size:15.5px;font-weight:600;color:#212121}
   .tm .role{font-size:13px;line-height:1.45;color:#6B6B70;margin-top:6px}
-  .tm .lvl{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-      border-radius:999px;padding:4px 11px;margin-top:12px;background:#F0F0F3;color:#6B6B70}
+  .tm .lvl{align-self:center;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+      border-radius:999px;padding:4px 11px;margin-top:auto;background:#F0F0F3;color:#6B6B70}
   .tm.mcc .lvl{background:var(--grad);color:#fff}
   .team-note{margin-top:22px;font-size:13.5px;line-height:1.55;color:#6B6B70}
 
@@ -1118,8 +1120,8 @@
       <div class="tm"><img src="assets/team_sasha.jpg" alt="Саша Баранова" width="104" height="104" loading="lazy"><div class="name">Саша Баранова</div><div class="role">со-автор программы, старший тренер, методолог</div><span class="lvl">PCC ICF</span></div>
       <div class="tm"><img src="assets/team_olga.jpg" alt="Ольга Вильковская" width="104" height="104" loading="lazy"><div class="name">Ольга Вильковская</div><div class="role">супервизор, эксперт ФПКиН, президент клуба коучей ВШЭ</div><span class="lvl">PCC ICF</span></div>
       <div class="tm"><img src="assets/team_elena.jpg" alt="Елена Зарудаева" width="104" height="104" loading="lazy"><div class="name">Елена Зарудаева</div><div class="role">ментор и супервизор, психолог</div><span class="lvl">PCC ICF</span></div>
-      <div class="tm mcc"><img src="assets/team_levina.jpg" alt="Анастасия Левина" width="104" height="104" loading="lazy"><div class="name">Анастасия Левина</div><div class="role">приглашённый мастер-коуч, кандидат наук</div><span class="lvl">MCC ICF</span></div>
-      <div class="tm mcc"><img src="assets/team_revetneva.jpg" alt="Олеся Реветнева" width="104" height="104" loading="lazy"><div class="name">Олеся Реветнева</div><div class="role">приглашённый мастер-коуч, CEO Академии арт-коучинга</div><span class="lvl">MCC ICF</span></div>
+      <div class="tm mcc"><img src="assets/team_levina.jpg" alt="Анастасия Левина" width="104" height="104" loading="lazy"><div class="name">Анастасия Левина</div><div class="role">приглашённый тренер и ментор, кандидат наук</div><span class="lvl">MCC ICF</span></div>
+      <div class="tm mcc"><img src="assets/team_revetneva.jpg" alt="Олеся Реветнева" width="104" height="104" loading="lazy"><div class="name">Олеся Реветнева</div><div class="role">приглашённый тренер и ментор, CEO Академии арт-коучинга</div><span class="lvl">MCC ICF</span></div>
     </div>
     <p class="team-note">Это состав команды текущего потока Level 2. Состав команды следующего потока может незначительно измениться.</p>
   </div>
