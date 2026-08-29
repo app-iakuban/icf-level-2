@@ -581,9 +581,10 @@ gtag('config','AW-17650633966');
 .ih-m-sub.is-open{display:flex}
 .ih-m-sub a{padding:8px 0;font-size:14px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}
 .ih-m-sub a:hover,.ih-m-sub a[aria-current="page"]{color:#fff}
-.ih-mobile>.ih-m-list>a{padding:12px 0;font-size:16px;color:rgba(255,255,255,.7);
+/* только текстовые пункты: у кнопок .ih-btn-* свои цвета и паддинги */
+.ih-mobile>.ih-m-list>a:not([class*="ih-btn-"]){padding:12px 0;font-size:16px;color:rgba(255,255,255,.7);
   text-decoration:none;transition:color .2s}
-.ih-mobile>.ih-m-list>a:hover{color:#fff}
+.ih-mobile>.ih-m-list>a:not([class*="ih-btn-"]):hover{color:#fff}
 .ih-mobile .ih-btn-cta,.ih-mobile .ih-btn-solid,.ih-mobile .ih-btn-outline{margin-top:10px;width:100%}
 
 @media (max-width:767px){
@@ -608,8 +609,8 @@ gtag('config','AW-17650633966');
 .ih-light .ih-btn-solid:hover{background:#333340}
 .ih-light .ih-burger{color:#28345B}
 .ih-light .ih-mobile{border-top-color:rgba(196,207,223,.6)}
-.ih-light .ih-m-btn,.ih-light .ih-mobile>.ih-m-list>a{color:#4C587D}
-.ih-light .ih-m-btn:hover,.ih-light .ih-mobile>.ih-m-list>a:hover{color:#28345B}
+.ih-light .ih-m-btn,.ih-light .ih-mobile>.ih-m-list>a:not([class*="ih-btn-"]){color:#4C587D}
+.ih-light .ih-m-btn:hover,.ih-light .ih-mobile>.ih-m-list>a:not([class*="ih-btn-"]):hover{color:#28345B}
 .ih-light .ih-m-sub a{color:#626C8E}
 .ih-light .ih-m-sub a:hover,.ih-light .ih-m-sub a[aria-current="page"]{color:#28345B}
 .ih-light a:focus-visible,.ih-light button:focus-visible{outline-color:#3D3DF0}
@@ -741,6 +742,56 @@ gtag('config','AW-17650633966');
     if(mobile){ mobile.classList.remove('is-open'); burger.setAttribute('aria-expanded','false'); }
     if(mSub){ mSub.classList.remove('is-open'); mBtn.setAttribute('aria-expanded','false'); }
   });
+})();
+
+/* ─── Код заявки для Telegram-CTA (сквозная атрибуция лидов) ───
+   Визиту присваивается код «Заявка №XXXXX», он дописывается в префилл всех
+   ссылок t.me/iakuban_team. По клику код вместе с UTM исходного захода уходит
+   в access-лог сервера (HEAD-запрос) и в GA4 (событие tg_lead_code).
+   Разбор и схема: Marketing/operations/2026-08-23_lead_attribution_szilviya.md */
+(function(){
+  var TG = 'https://t.me/iakuban_team';
+
+  function get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }
+  function set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} }
+
+  // источник запоминаем на первой странице визита: дальше по сайту query теряется
+  if(/[?&](utm_|gclid|yclid|gad_|fbclid)/.test(location.search) && !get('ihLeadSrc')){
+    set('ihLeadSrc', location.search.slice(1));
+  }
+
+  var code = get('ihLeadCode');
+  if(!code){
+    // без похожих друг на друга символов: код диктуют голосом и переписывают руками
+    var abc = 'ABCEHKMPTXY2345679';
+    code = '';
+    for(var i=0;i<5;i++) code += abc.charAt(Math.floor(Math.random()*abc.length));
+    set('ihLeadCode', code);
+  }
+
+  function decorate(){
+    var links = document.querySelectorAll('a[href^="' + TG + '"]');
+    for(var i=0;i<links.length;i++){
+      try{
+        var u = new URL(links[i].href);
+        var t = u.searchParams.get('text');
+        if(!t || t.indexOf('Заявка №') !== -1) continue;
+        links[i].href = u.origin + u.pathname + '?text=' + encodeURIComponent(t + '\n\nЗаявка №' + code);
+      }catch(e){}
+    }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorate);
+  else decorate();
+
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href^="https://t.me/"]');
+    if(!a) return;
+    var q = 'ihlc=' + code +
+      '&src=' + encodeURIComponent(get('ihLeadSrc') || '') +
+      '&ref=' + encodeURIComponent(document.referrer || '');
+    try { fetch(location.pathname + '?' + q, {method:'HEAD', keepalive:true, cache:'no-store'}); } catch(err){}
+    try { gtag('event','tg_lead_code',{'lead_code': code, 'transport_type':'beacon'}); } catch(err){}
+  }, true);
 })();
 </script>
 <!-- IH-HEADER:END -->
@@ -1010,7 +1061,7 @@ gtag('config','AW-17650633966');
  <div class="fmt"><div class="v">15 четвергов</div><div class="l"><b>Все обязательные дни</b> — тренинги по четвергам, даты известны до старта</div></div>
  <div class="fmt"><div class="v">10:00 МСК</div><div class="l">Начало тренингов · 9:00 по Мадриду (GMT+2) — удобно из Европы и СНГ</div></div>
  <div class="fmt"><div class="v">Гибкие слоты</div><div class="l">Менторинги, супервизии и практика в тройках — <b>выбираете время сами</b></div></div>
- <div class="fmt"><div class="v">До 10 человек</div><div class="l">Малые группы: один преподаватель на 6 участников</div></div>
+ <div class="fmt"><div class="v">До 10 человек</div><div class="l">Групповые менторинги, супервизии и интервизии — <b>в малых группах</b>, а не всем потоком</div></div>
  </div>
  <div class="cal-note">
  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#9DB4FF" stroke-width="1.8"/><path d="M12 7v5l3.2 2" stroke="#9DB4FF" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1415,13 +1466,11 @@ gtag('config','AW-17650633966');
  "coursePrerequisites": "Сертификат ICF Level 1 или ACC ICF",
  "timeRequired": "P7M",
  "availableLanguage": "ru",
- "offers": {
- "@type": "Offer",
- "price": "2300",
- "priceCurrency": "EUR",
- "availability": "https://schema.org/InStock",
- "url": "https://iakuban.com/icf-level-2/"
- },
+ "offers": [
+ {"@type": "Offer", "name": "Тариф «Мудрец»", "price": "2300", "priceCurrency": "EUR", "url": "https://iakuban.com/icf-level-2/", "availability": "https://schema.org/InStock"},
+ {"@type": "Offer", "name": "Тариф «Правитель»", "price": "3500", "priceCurrency": "EUR", "url": "https://iakuban.com/icf-level-2/", "availability": "https://schema.org/InStock"},
+ {"@type": "Offer", "name": "Тариф «Маг»", "price": "4700", "priceCurrency": "EUR", "url": "https://iakuban.com/icf-level-2/", "availability": "https://schema.org/InStock"}
+ ],
  "hasCourseInstance": {
  "@type": "CourseInstance",
  "courseMode": "Online",
