@@ -26,12 +26,33 @@ document.addEventListener("DOMContentLoaded", function(event) {
  window.cookiehub.load(cpm);
 });
 </script>
-<!-- Google Analytics (GA4) G-Y2D060K2Z4 + Google Ads AW-17650633966 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y2D060K2Z4"></script>
+<!-- Google Analytics (GA4) G-Y2D060K2Z4 + Google Ads AW-17650633966.
+ Внутренний режим (?internal=1, флаг в localStorage) счётчики не поднимает:
+ наши проверки сайта не должны идти ни в GA4, ни в Метрику. Тот же ключ читает
+ Nuxt (nuxt-src/lib/internalMode.ts) и чат (chat-widget.js). -->
 <script>
-gtag('js',new Date());
-gtag('config','G-Y2D060K2Z4');
-gtag('config','AW-17650633966');
+(function(){
+ var internal=false;
+ try{
+  var p=new URLSearchParams(location.search).get('internal');
+  if(p==='1')localStorage.setItem('iakuban_internal','1');
+  if(p==='0'||p==='false')localStorage.removeItem('iakuban_internal');
+  internal=localStorage.getItem('iakuban_internal')==='1';
+ }catch(e){}
+ if(internal){
+  document.addEventListener('DOMContentLoaded',function(){
+   var t=document.querySelectorAll('script[type="text/plain"][data-consent]');
+   for(var i=0;i<t.length;i++)t[i].parentNode.removeChild(t[i]);
+  });
+  return;
+ }
+ var s=document.createElement('script');
+ s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-Y2D060K2Z4';
+ document.head.appendChild(s);
+ gtag('js',new Date());
+ gtag('config','G-Y2D060K2Z4');
+ gtag('config','AW-17650633966');
+})();
 </script>
 <!-- Yandex.Metrika 109783359 — разблокируется CookieHub'ом только при согласии на analytics;
  вебвизор выключен (отдельного согласия на запись сессий нет) -->
@@ -769,6 +790,9 @@ gtag('config','AW-17650633966');
   if(/[?&](utm_|gclid|yclid|gad_|fbclid)/.test(location.search) && !get('ihLeadSrc')){
     set('ihLeadSrc', location.search.slice(1));
   }
+  // копия в памяти: CookieHub по «Запретить все» чистит sessionStorage целиком
+  // (проверено 08.09.2026), а источник нужен и тому, кто отказался от cookie
+  var memSrc = get('ihLeadSrc') || '';
 
   var code = get('ihLeadCode');
   if(!code){
@@ -797,8 +821,11 @@ gtag('config','AW-17650633966');
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('a[href^="https://t.me/"]');
     if(!a) return;
+    var src = get('ihLeadSrc') || memSrc ||
+      (/[?&](utm_|gclid|yclid|gad_|fbclid)/.test(location.search) ? location.search.slice(1) : '');
+    set('ihLeadCode', code); if(src) set('ihLeadSrc', src);
     var q = 'ihlc=' + code +
-      '&src=' + encodeURIComponent(get('ihLeadSrc') || '') +
+      '&src=' + encodeURIComponent(src) +
       '&ref=' + encodeURIComponent(document.referrer || '');
     try { fetch(location.pathname + '?' + q, {method:'HEAD', keepalive:true, cache:'no-store'}); } catch(err){}
     try { gtag('event','tg_lead_code',{'lead_code': code, 'transport_type':'beacon'}); } catch(err){}
@@ -809,7 +836,7 @@ gtag('config','AW-17650633966');
      и тот же виджет работает и здесь, и на страницах платформы. Подключение
      живёт в шапке, потому что она уже разъезжается по всем лендингам одной
      командой и другого общего блока у статики нет. -->
-<script src="https://iakuban.com/chat-widget.js?v=20260907-1" defer></script>
+<script src="https://iakuban.com/chat-widget.js?v=20260908-1" defer></script>
 <!-- IH-HEADER:END -->
 
 <main>
@@ -963,6 +990,43 @@ gtag('config','AW-17650633966');
  .otherschool .btn{flex-shrink:0}
  @media(max-width:760px){.otherschool{flex-direction:column;align-items:flex-start}}
 </style>
+
+<!-- КОМУ НЕ ПОДХОДИТ -->
+<style>
+ .notfor{padding:0 0 96px}
+ .notfor-head{max-width:760px;margin-bottom:40px}
+ .notfor-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+ .notfor-card{background:#fff;border:1px solid #ECECEF;border-left:3px solid #C9C9D6;border-radius:16px;padding:26px 28px}
+ .notfor-card h3{font-family:var(--headline);font-weight:500;font-size:18px;margin-bottom:8px;color:#212121}
+ .notfor-card p{font-size:15px;line-height:1.6;color:#5A5A5F}
+ @media(max-width:760px){.notfor-grid{grid-template-columns:1fr}}
+</style>
+<section class="notfor">
+ <div class="wrap">
+ <div class="notfor-head">
+ <p class="sec-eyebrow">Кому не подходит</p>
+ <h2 class="sec-title">Честный список перед собеседованием</h2>
+ </div>
+ <div class="notfor-grid">
+ <div class="notfor-card">
+ <h3>Ещё нет Level 1 ICF или ACC ICF</h3>
+ <p>Level 2 работает на компетенциях, которые даёт базовая аккредитация, и без них разбирать глубокие сессии не с чего. Если сертификата пока нет, дорога короче через <a href="https://iakuban.com/icf-level-1/">Level 1 «Магия и наука коучинга»</a>.</p>
+ </div>
+ <div class="notfor-card">
+ <h3>Клиентской практики сейчас почти нет</h3>
+ <p>Программа разбирает ваши реальные сессии с реальными клиентами. Без текущей практики разбирать на тренинге будет нечего, а Level 2 добавит глубины уже идущей практике.</p>
+ </div>
+ <div class="notfor-card">
+ <h3>Нужен ещё один набор техник, а не работа над собой</h3>
+ <p>Здесь в основном разбирают ваши слепые зоны, паттерны и ценности, а не добавляют новые инструменты для сессии. Кому важнее пополнить методическую библиотеку, будет тесно.</p>
+ </div>
+ <div class="notfor-card">
+ <h3>Нет 7 месяцев на регулярный ритм</h3>
+ <p>15 фиксированных четвергов плюс менторинг и супервизии в гибких слотах растягиваются на весь этот срок. Если сейчас плотный период, честнее прийти на следующий поток.</p>
+ </div>
+ </div>
+ </div>
+</section>
 
 <!-- ПРОБЛЕМА / РЕШЕНИЕ + ЦЕННОСТИ -->
 <section class="system">
