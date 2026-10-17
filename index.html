@@ -19,11 +19,33 @@ gtag('set','url_passthrough',true);
 gtag('set','ads_data_redaction',true);
 </script>
 <!-- CookieHub CMP (домен iakuban.com, код 57650153) — до всех остальных скриптов -->
-<script src="https://cdn.cookiehub.eu/c2/57650153.js"></script>
+<!-- С 10.10.2026 CookieHub грузится через наш домен: /cookiehub/ проксирует nginx landings к cdn.cookiehub.eu.
+ CDN CookieHub на Bunny, россиянам он иногда отдаёт узел Datacamp, который ТСПУ рвёт после 16 КБ:
+ баннера нет, GA4 и Метрика не стартуют. Не загрузился с нашего домена — запасной путь на CDN.
+ load() только через iakCookiehubStart: без CookieHub страница не падает (SEO/operations/2026-10-10_cookiehub_ru_delivery.md). -->
+<script src="/cookiehub/c2/57650153.js"></script>
+<script>
+(function(){
+ var CDN='https://cdn.cookiehub.eu',own=!!window.cookiehub,opts=null,done=false;
+ function fix(){
+  var h=window.__cookiehub,p=location.origin+'/cookiehub',k=['css','assets','dist','cdn'];
+  if(!own||!h)return;
+  for(var i=0;i<k.length;i++){if(typeof h[k[i]]==='string'&&h[k[i]].indexOf(CDN)===0)h[k[i]]=p+h[k[i]].slice(CDN.length);}
+ }
+ function go(){
+  var c=window.cookiehub;
+  if(done||!opts||!c||typeof c.load!=='function')return;
+  done=true;fix();
+  try{c.load(opts);}catch(e){}
+ }
+ window.iakCookiehubStart=function(o){opts=o||{};go();};
+ if(!own){var s=document.createElement('script');s.src=CDN+'/c2/57650153.js';s.onload=go;document.head.appendChild(s);}
+})();
+</script>
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function(event) {
  var cpm = {};
- window.cookiehub.load(cpm);
+ window.iakCookiehubStart(cpm);
 });
 </script>
 <!-- Google Analytics (GA4) G-Y2D060K2Z4 + Google Ads AW-17650633966.
